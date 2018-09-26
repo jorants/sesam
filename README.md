@@ -11,11 +11,23 @@ Just add the `xdg-open` file in this repo to your path (before the real xdg-open
 The configuration file is in `~/.sesam` for the user and `/etc/sesam.conf` for the system wide config.
 A simple example:
 
-	text/* = emacs
-	image/* = feh <file> -.Z
-	x-scheme-handler/mailto = thunderbird
+	# you can simply list your mimetypes:
+	application/pdf = zathura
+
+	# mimetypes might have wildcards:
+	text/* = xemacs
 	video/* = mpv
-	# or, even fall back:
+
+	# you can use shorthands to include (parts of) the filename where needed
+	uimage/* = feh <file> -.Z
+
+	# URLs are also handled by scheme type:
+
+	x-scheme-handler/mailto = thunderbird
+	x-scheme-handler/http = firefox
+	x-scheme-handler/https = firefox
+
+	# You can even fallback on xdg-open if you would like
 	* = /usr/bin/xdg-open
 
 

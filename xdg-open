@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+import urllib, magic, sys, os, fnmatch, shlex, subprocess, mimetypes
+from configparser import SafeConfigParser
+
+# CONFIG:
+config_files = ['/etc/sesam.conf', '~/.sesam']
+#expand these types further by file extention instead of magic numbers
+mime_by_extention = ['text/plain']
+
+
+# inspired by: https://stackoverflow.com/questions/2819696/parsing-properties-file-in-python/2819788#2819788
+# shorter and more python3 implementation
+# adds a section header to the file
+def fakeSecHead(fp):
+    yield "[main]\n"
+    yield from fp
+
+def load_config():    
+    #load the config from all the files
+    config= SafeConfigParser()
+    filefound = False
+    for fn in config_files:
+        fn = os.path.expanduser(fn)
+        try:
+            config.readfp(fakeSecHead(open(fn)))
+            filefound = True
+        except FileNotFoundError:
+            pass
+
+    if not filefound:
+        print("No config found!")
+        exit(0)
+    return config
+
+HELP = """This is Sesam, a xdg-open replacement.
+xdg-open - opens a file or URL in the user's preferred  application
+
+Synopsis:
+    xdg-open { file | URL }"""
+
+def help():
+    print(HELP)
+    exit(0)
+
+def mime_from_file(fn):
+    mime = magic.from_file(fn,mime=True)
+    if mime in mime_by_extention:
+        res = mimetype.guess_type(fn)[0]
+        mime = mime if res == None else res    
+    return {'file': fn,
+            'mime': mime,
+            'filename': os.path.split(fn)[1],
+            'folder': os.path.split(fn)[0]}
+
+def mime_from_url(URL):
+    parsed = urllib.parse.urlparse(URL)
+    mime = "x-scheme-handler/"+parsed.scheme
+    return {'file': URL,
+            'mime': mime,
+            'scheme': parsed.scheme,
+            'path': URL[len(parsed.scheme)+1:]}
+    
+def get_mime(s):
+    if os.path.isfile(s) or os.path.isdir(s):
+        return mime_from_file(s)
+    elif urllib.parse.urlparse(s).scheme != '':
+        return mime_from_url(s)
+    else:
+        print("No such file")
+        exit(2)
+
+        
+if __name__ == "__main__":    
+    if len(sys.argv) != 2 or sys.argv[1] in ["--help", "-h", "--manual", "--version", "-v"]:
+        help()
+
+    config = load_config()
+    types = config.options('main')
+    mime = get_mime(sys.argv[1])
+    matches = [pattern for pattern in types if fnmatch.fnmatch(mime['mime'], pattern) ]
+    if len(matches) == 0:
+        print("Mimetype '%s' is not in config." % mime['mime'])
+        exit(3)
+    match = matches[0]
+    app = config.get('main',match)
+
+    # Replace the shorthand if needed
+    command  = app
+
+    for key, val in mime.items():
+        command = command.replace("<%s>" % key, shlex.quote(val))
+
+    if command == app:
+        command += " "+shlex.quote(sys.argv[1])    
+    subprocess.run([command],shell=True)    
