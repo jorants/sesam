@@ -49,3 +49,9 @@ For both file types and URLs you can add:
  - `<file>` - full path as passed
 
 If no shorthand is present, then the the full filename is added at the end of the command.
+
+
+## Inspiration
+
+This project is inspired by [mimi](https://github.com/march-linux/mimi).
+However, I did not like everything about mimi, so i wrote my own.
