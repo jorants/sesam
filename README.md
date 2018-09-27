@@ -1,10 +1,12 @@
 # Sesam
 Very simple xdg-open replacement in python.
-xdg-open sucks without a full desktop environment, plus, things should be simple.
+xdg-open sucks without a full desktop environment, plus, things should be simpler to configure.
+Sesam allows you to use wildcards in your config to easily catch media types and URLS.
+It also ignores the desktop files and uses commands instead, although it is possible to fall back on xdg-open and use the desktop files in this way.
 
 ## Install
 Just add the `xdg-open` file in this repo to your path (before the real xdg-open) and make sure it is executable.
-
+You will need python3 with `python-magic` installed (`pip3 install python-magic`)
 
 ## Config
 
@@ -54,4 +56,8 @@ If no shorthand is present, then the the full filename is added at the end of th
 ## Inspiration
 
 This project is inspired by [mimi](https://github.com/march-linux/mimi).
-However, I did not like everything about mimi, so i wrote my own.
+However, mini seems to hard code URLs and some other stuff, which takes power away from the config.
+
+## Questions & Input
+
+Please feel free to ask questions or suggest features!
